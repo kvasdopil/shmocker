@@ -4,12 +4,14 @@ Shmocker project is an attempt to emulate docker containering software for FreeB
 The docker is a great project, one of the biggest flaws it has - lack of FreeBSD support. To run doker on FreeBSD we need several improvements to this project:
 
 * graphdriver - layer that will emulate docker union file system and provide filesystem layers functionality. On FreeBSD this can be done easily with ZFS. Actually zfs graphdriver is already in docker/master branch, and it works on FreeBSD with minor changes.
-* execdriver - layer that deals with container execution. FreeBSD got jails, so this should not be hard to implement. There's a implementation of jail execdriver from @kzys, but it's very preliminary and need a lot of improvement.
-* networkdriver - layer that will be dealing with network port mappings etc. Not quite sure if it must be rewritten for FreeBSD, but if so, PF should be suitable.
+* execdriver - layer that deals with container execution. FreeBSD got jails, so this should not be hard to implement. There's a implementation of jail execdriver from @kzys, but it's very preliminary (i.e. not working at all).
+* networkdriver - layer that will be dealing with network port mappings\NAT\bridge driver etc. This also needs to be rewritten for FreeBSD.
 
 # Ehmm. So why not fork a docker?
 
-While investigating opportunities of creatings docker drivers, getting along with go, etc. I came with idea of writing simple script that will be doing the same things the docker does i.e. kinda emulate docker behavior to find out if FreeBSD has all the technologies required and what should be done to write an actual driver. Besides now i'll be able to use this docker-ish technology for my primary job, and can evaluate pros and cons of migrating to container infrastructure right now.
+Because it's hard. Despite some huge cross-platform-ready refactorings, some parts of docker still rely on linux subsystems too much, and a lot of careful work should be done just to compile it on bsd. (Which I did, actually. Gonna publish it soon.)
+
+In other hands, while investigating opportunities of creatings docker drivers, getting along with go, etc. I came with idea of writing simple script that will be doing the same things the docker does. This kinda docker emulatior can help to find out if FreeBSD has all the technologies required and what should be done to write actual drivers. Besides with it I'll be able to use this docker-ish technology for my primary job tasks, and can evaluate pros and cons of migrating to container infrastructure right now.
 
 So this quick-and-dirty script appeared and, surprisingly, it already can do a lot of things docker can, i.e.:
 
