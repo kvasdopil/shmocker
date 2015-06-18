@@ -199,7 +199,7 @@ class Client
 
       if($img['running'])
       {
-        error ("Container '$cont' is running, cannot delete");
+        $this->error("Container '$cont' is running, cannot delete");
         continue;
       }
 
@@ -285,6 +285,33 @@ class Client
 
   function startCmd($argv)
   {
+    $options = array(
+      'volumes' => array()
+    );
+
+    if(count($argv))
+    {
+      $cmd = array_shift($argv);
+      switch($cmd)
+      {
+      case "-v":
+        if(!count($argv))
+          return $this->showHelp("run");
+
+        $vol = explode(":", array_shift($argv), 3);
+        if(count($vol) == 1)
+          $options['volumes'][] = array("src" => $vol[0], "dst" => $vol[0], "mode" => "rw");
+        if(count($vol) == 2)
+          $options['volumes'][] = array("src" => $vol[0], "dst" => $vol[1], "mode" => "rw");
+        if(count($vol) == 3)
+          $options['volumes'][] = array("src" => $vol[0], "dst" => $vol[1], "mode" => $vol[3]);
+        break;
+
+      default:
+        array_unshift($argv, $cmd);
+      }
+    }
+    
     if(count($argv) < 1)
       return $this->showHelp("start");
 
@@ -303,7 +330,7 @@ class Client
         continue;
       }
 
-      $res = $this->srv->startContainer($img['id']);
+      $res = $this->srv->startContainer($img['id'], $options);
       echo "$res\n";
     }
 
@@ -312,6 +339,33 @@ class Client
 
   function runCmd($argv)
   {
+    $options = array(
+      'volumes' => array()
+    );
+
+    if(count($argv))
+    {
+      $cmd = array_shift($argv);
+      switch($cmd)
+      {
+      case "-v":
+        if(!count($argv))
+          return $this->showHelp("run");
+
+        $vol = explode(":", array_shift($argv), 3);
+        if(count($vol) == 1)
+          $options['volumes'][] = array("src" => $vol[0], "dst" => $vol[0], "mode" => "rw");
+        if(count($vol) == 2)
+          $options['volumes'][] = array("src" => $vol[0], "dst" => $vol[1], "mode" => "rw");
+        if(count($vol) == 3)
+          $options['volumes'][] = array("src" => $vol[0], "dst" => $vol[1], "mode" => $vol[3]);
+        break;
+
+      default:
+        array_unshift($argv, $cmd);
+      }
+    }
+
     if(count($argv) < 2)
       return $this->showHelp("run");
 
@@ -322,7 +376,7 @@ class Client
       return $this->error("Image '$image' not found");
 
     $res = $this->srv->createContainer($img['id'], $argv);
-    $res = $this->srv->startContainer($res);
+    $res = $this->srv->startContainer($res, $options);
     echo "$res\n";
     return 0;
   }

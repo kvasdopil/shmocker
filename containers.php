@@ -62,7 +62,7 @@ class Containers
       "zfs clone".
       " -o shmocker:ip=$ip".
       " -o shmocker:cmd=".escapeshellarg(implode(" ", $cmd)).      
-      " -o mountpoint=/mnt/jails/$name $path/images/{$image}@ok".
+      " -o mountpoint=legacy $path/images/{$image}@ok".
       " $path/jails/$name"
     );
 
@@ -72,6 +72,7 @@ class Containers
   public function removeContainer($name)
   {
     $path = $this->getPath();
+    shell_exec("umount -f $path/jails/{$name} 2> /dev/null");
     shell_exec("zfs destroy $path/jails/{$name}");
 
     $this->removePurgedImages();
@@ -79,16 +80,43 @@ class Containers
     return $name;
   }
 
-  public function startContainer($cont)
+  public function startContainer($cont, $opt)
   {
     $this->buildJailConf($cont);
+    $ip  = $this->zfsProperty("jails/$cont", "shmocker:ip");
+
+    $path = $this->getPath();
+
+    mkdir("/mnt/jails/$cont");
+    shell_exec("mount -t zfs $path/jails/$cont /mnt/jails/$cont");
+    foreach($opt['volumes'] as $vol)
+    {
+      shell_exec("kldload -n nullfs");
+
+      $m = "";
+      if($vol['mode'] == "ro")
+        $m = "-oro";
+
+      shell_exec("mount -t nullfs $m {$vol['src']} /mnt/jails/$cont/{$vol['dst']}");
+    }
     passthru("jail -qf /tmp/jail.conf -c $cont");
+
+    $this->stopContainer($cont);
   }
 
   public function stopContainer($cont)
   {
     $this->buildJailConf($cont);
     shell_exec("jail -qf /tmp/jail.conf -r $cont");
+
+    foreach(explode("\n", trim(shell_exec("mount"))) as $mount)
+    {
+      $mount = preg_split("#[ \t]+#", $mount);
+      if(preg_match("#^/mnt/jails/$cont#", $mount[2]))
+        shell_exec("umount {$mount[2]} 2> /dev/null");
+    }
+
+    shell_exec("ifconfig lo1 delete $ip");
   }
 
   public function execCommandInContainer($cont, $cmd)
