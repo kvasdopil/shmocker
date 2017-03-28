@@ -1,7 +1,7 @@
 # What is this
 Shmocker project is an attempt to emulate docker containering software for FreeBSD.
 
-The docker is a great project, one of the biggest flaws it has - lack of FreeBSD support. To run doker on FreeBSD we need several improvements to this project:
+The docker is a great project, one of the biggest flaws it has is the lack of FreeBSD support. To run doker on FreeBSD we need several improvements to this project:
 
 * graphdriver - layer that will emulate docker union file system and provide filesystem layers functionality. On FreeBSD this can be done easily with ZFS. Actually zfs graphdriver is already in docker/master branch, and it works on FreeBSD with minor changes.
 * execdriver - layer that deals with container execution. FreeBSD got jails, so this should not be hard to implement. There's a implementation of jail execdriver from @kzys, but it's very preliminary (i.e. not working at all).
@@ -9,7 +9,7 @@ The docker is a great project, one of the biggest flaws it has - lack of FreeBSD
 
 # Ehmm. So why not fork a docker?
 
-Because it's hard. Despite some huge cross-platform-ready refactorings, some parts of docker still rely on linux subsystems too much, and a lot of careful work should be done just to compile it on bsd. (Which I did, actually. Gonna publish it soon.)
+That's not so simple. Despite some huge cross-platform-ready refactorings, some parts of docker still rely on linux subsystems too much, and a lot of careful work should be done just to compile it on bsd. Currently I don't have enough spare time for this and nobody else seem to did it since 2015.
 
 In other hands, while investigating opportunities of creatings docker drivers, getting along with go, etc. I came with idea of writing simple script that will be doing the same things the docker does. This kinda docker emulatior can help to find out if FreeBSD has all the technologies required and what should be done to write actual drivers. Besides with it I'll be able to use this docker-ish technology for my primary job tasks, and can evaluate pros and cons of migrating to container infrastructure right now.
 
@@ -18,17 +18,14 @@ So this quick-and-dirty script appeared and, surprisingly, it already can do a l
 * image loading\saving
 * container creation, committing to image, all that copy-on-write stuff
 * jail execution (with some caveats)
+* volumes
+* networking
 
 Still not working:
-* volumes
+* named volumes
 * port mappings
 * tags
 * repository functions
-
-But hey, there was only couple of days of work;)
-
-# PHP? Are you kidding me?
-Yep, sorry for that. But remember, this is just a prototype for testing purposes intended to be written quick-and-just-working way.
 
 # So how to use this?
 First you need to run (as a root):
@@ -54,4 +51,3 @@ Now create a container and run it
 # Contributing
 
 Please feel free to use the script or modify it, any comments are welcomed.
-
